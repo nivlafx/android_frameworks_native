@@ -2166,7 +2166,6 @@ bool SurfaceFlinger::doComposeSurfaces(const sp<const DisplayDevice>& hw, const 
 
 
             // screen is already cleared here
-
             if (!region.isEmpty()) {
                 // can happen with SurfaceView
                 drawWormhole(hw, region);
@@ -2264,9 +2263,6 @@ bool SurfaceFlinger::doComposeSurfaces(const sp<const DisplayDevice>& hw, const 
                         layer->draw(hw, clip);
                         break;
                     }
-                    case HWC_BLIT:
-                        //Do nothing
-                        break;
                     case HWC_FRAMEBUFFER_TARGET: {
                         // this should not happen as the iterator shouldn't
                         // let us get there.
