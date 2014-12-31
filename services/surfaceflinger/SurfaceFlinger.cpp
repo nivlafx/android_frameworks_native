@@ -2166,29 +2166,10 @@ bool SurfaceFlinger::doComposeSurfaces(const sp<const DisplayDevice>& hw, const 
 
 
             // screen is already cleared here
-#ifdef QCOM_BSP
-            clearRegion.clear();
-            if(mGpuTileRenderEnable && (mDisplays.size()==1)) {
-                clearRegion = region;
-                if (cur == end) {
-                    drawWormhole(hw, region);
-                } else if(mCanUseGpuTileRender) {
-                   /* If GPUTileRect DR optimization on clear only the UnionDR
-                    * (computed by computeTiledDr) which is the actual region
-                    * that will be drawn on FB in this cycle.. */
-                    clearRegion = clearRegion.andSelf(Region(mUnionDirtyRect));
-                }
-            } else
-#endif
-            {
-                if (!region.isEmpty()) {
-                    if (cur != end) {
-                        if (cur->getCompositionType() != HWC_BLIT)
-                            // can happen with SurfaceView
-                            drawWormhole(hw, region);
-                    } else
-                        drawWormhole(hw, region);
-                }
+
+            if (!region.isEmpty()) {
+                // can happen with SurfaceView
+                drawWormhole(hw, region);
             }
         }
 
