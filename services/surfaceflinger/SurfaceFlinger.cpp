@@ -1171,31 +1171,6 @@ void SurfaceFlinger::setUpHWComposer() {
             sp<const DisplayDevice> hw(mDisplays[dpy]);
             const int32_t id = hw->getHwcDisplayId();
             if (id >= 0) {
-                // Get the layers in the current drawying state
-                const LayerVector& layers(mDrawingState.layersSortedByZ);
-#ifdef QCOM_BSP
-                bool freezeSurfacePresent = false;
-                const size_t layerCount = layers.size();
-                // Look for ScreenShotSurface in external layer list, only when
-                // disable external rotation animation feature is enabled
-                if(mDisableExtAnimation && (id != HWC_DISPLAY_PRIMARY)) {
-                    for (size_t i = 0 ; i < layerCount ; ++i) {
-                        static int screenShotLen = strlen("ScreenshotSurface");
-                        const sp<Layer>& layer(layers[i]);
-                        const Layer::State& s(layer->getDrawingState());
-                        // check the layers associated with external display
-                        if(s.layerStack == hw->getLayerStack()) {
-                            if(!strncmp(layer->getName(), "ScreenshotSurface",
-                                    screenShotLen)) {
-                                // Screenshot layer is present, and animation in
-                                // progress
-                                freezeSurfacePresent = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-#endif
                 const Vector< sp<Layer> >& currentLayers(
                     hw->getVisibleLayersSortedByZ());
                 const size_t count = currentLayers.size();
@@ -1208,24 +1183,6 @@ void SurfaceFlinger::setUpHWComposer() {
                      */
                     const sp<Layer>& layer(currentLayers[i]);
                     layer->setPerFrameData(hw, *cur);
-#ifdef QCOM_BSP
-                    if(freezeSurfacePresent) {
-                        // if freezeSurfacePresent, set ANIMATING flag
-                        cur->setAnimating(true);
-                    } else {
-                        const KeyedVector<wp<IBinder>, DisplayDeviceState>&
-                                                draw(mDrawingState.displays);
-                        size_t dc = draw.size();
-                        for (size_t i=0 ; i<dc ; i++) {
-                            if (draw[i].isMainDisplay()) {
-                                 // Pass the current orientation to HWC
-                                 hwc.eventControl(HWC_DISPLAY_PRIMARY,
-                                         SurfaceFlinger::EVENT_ORIENTATION,
-                                         uint32_t(draw[i].orientation));
-                            }
-                        }
-                    }
-#endif
                 }
             }
         }
